@@ -25,15 +25,15 @@ CREATE TABLE funcionario(
 id INT AUTO_INCREMENT PRIMARY KEY,
 nome VARCHAR(30) NOT NULL,
 idade SMALLINT,
-sexo CHAR CHECK(sexo in ('m', 'f', 'o')),
+sexo CHAR(1) CHECK(sexo in ('m', 'f', 'o')),
 cargo VARCHAR(10) CHECK(cargo in('vendedor','gerente','CEO')),
-salario DOUBLE(6,2),
+salario DOUBLE(10,2),
 nascimento DATE
 );
 
 CREATE TABLE produto(
 id INT AUTO_INCREMENT PRIMARY KEY,
-nome VARCHAR(30) NOT NULL,
+nome VARCHAR(100) NOT NULL,
 quantidade SMALLINT,
 descricao VARCHAR(200),
 valor DOUBLE(10,2)
@@ -49,26 +49,25 @@ FOREIGN KEY (id_cliente) REFERENCES cliente(id)
 );
 
 -- INSERINDO VALORES
-INSERT INTO funcionario VALUES 
-(NULL,'Russo', 21, 'm', 'CEO', 10000, 20010101),
-(NULL,'Arquimedes', 27,'m', 'gerente', 9000, 19961002),
-(NULL,'Gil', 21,'m', 'vendedor', 8000, 20020606),
-(NULL,'Duda', 21,'f', 'vendedor', 8000, 20030101),
-(NULL,'Ray', 21,'f', 'vendedor', 8000, 20010101);
+INSERT INTO funcionario (nome, idade, sexo, cargo, salario, nascimento) VALUES
+('Russo', 21, 'm', 'CEO', 1000.00, '2001-01-01'),
+('Arquimedes', 27, 'm', 'gerente', 9000.00, '1996-10-02'),
+('Gil', 21, 'm', 'vendedor', 8000.00, '2002-06-06'),
+('Duda', 21, 'f', 'vendedor', 8000.00, '2003-01-01'),
+('Ray', 21, 'f', 'vendedor', 8000.00, '2001-01-01');
 
 SELECT *,DATE_FORMAT(nascimento,'%m/%y') from funcionario;
 
+SELECT * from funcionario;
 
-INSERT INTO cliente VALUES 
+INSERT INTO cliente (id, nome, sexo, idade, nascimento) VALUES 
 (1, 'João Silva', 'm', 25, 19990515),
 (2, 'Maria Santos', 'f', 30, 19940820),
 (3, 'Pedro Oliveira', 'm', 22,20020210),
 (4, 'Ana Costa', 'f', 35, 19871125),
 (5, 'Carlos Pereira', 'm', 28, 19940307),
 (6, 'Juliana Almeida', 'f', 40, 19820912),
-(7, 'Fernando Santos', 'm', 33, 19890630);
-
-INSERT INTO cliente VALUES 
+(7, 'Fernando Santos', 'm', 33, 19890630),
 (8, 'Sandra Silva', 'f', 27, 19951218),
 (9, 'Ricardo Souza', 'm', 45, 19770402),
 (10, 'Luciana Lima', 'f', 29, 19930724),
@@ -108,9 +107,7 @@ INSERT INTO cliente VALUES
 (44, 'Fernanda Almeida', 'f', 31, 19910810),
 (45, 'Anderson Costa', 'm', 33, 19891015),
 (46, 'Patrícia Oliveira', 'f', 27, 19950405),
-(47, 'Marcos Santos', 'm', 29, 19931130);
-
-INSERT INTO cliente (id, nome, sexo, idade, nascimento) VALUES 
+(47, 'Marcos Santos', 'm', 29, 19931130),
 (48, 'Mariana Almeida', 'f', 21, 20030215),
 (49, 'Lucas Silva', 'm', 22, 20020520),
 (50, 'Juliana Costa', 'f', 23, 20010310),
@@ -168,29 +165,28 @@ INSERT INTO cliente (id, nome, sexo, idade, nascimento) VALUES
 SELECT COUNT(*) FROM cliente;
 
 
-INSERT INTO produto VALUES
-(null,'Processador Intel Core i9', 50, 'Processador de alto desempenho para PCs', 1899.99),
-(null,'Placa Mãe ASUS ROG Strix Z590-E Gaming', 30, 'Placa mãe para jogos com suporte a Intel 11ª e 10ª geração', 1399.99),
-(null,'Gabinete NZXT H510', 100, 'Gabinete compacto e elegante com painel frontal de vidro temperado', 299.99),
-(null,'Fonte Corsair RM750x', 80, 'Fonte de alimentação modular com certificação 80 Plus Gold', 699.99),
-(null,'SSD Samsung 970 EVO Plus 1TB', 120, 'SSD NVMe M.2 com velocidades de leitura de até 3500MB/s', 899.99),
-(null,'HD Seagate Barracuda 2TB', 60, 'HD SATA 3.5" para armazenamento de dados', 399.99),
-(null,'Cooler Master Hyper 212 RGB', 50, 'Cooler de CPU com iluminação RGB', 199.99),
-(null,'Memória RAM Corsair Vengeance RGB Pro 16GB (2x8GB)', 70, 'Kit de memória DDR4 com iluminação RGB', 599.99),
-(null,'Placa de Vídeo NVIDIA GeForce RTX 3080', 40, 'Placa de vídeo de alta performance para jogos e computação gráfica', 5499.99),
-(null,'Water Cooler NZXT Kraken X73', 30, 'Sistema de resfriamento líquido com radiador de 360mm', 899.99),
-(null,'Monitor Gamer Acer Predator XB273K', 25, 'Monitor 4K com tecnologia G-Sync para jogos', 3499.99),
-(null,'Teclado Mecânico Corsair K95 RGB Platinum XT', 50, 'Teclado mecânico premium com iluminação RGB', 899.99),
-(null,'Mouse Gamer Logitech G502 Hero', 80, 'Mouse gamer com sensor Hero de até 16000 DPI', 299.99),
-(null,'Headset HyperX Cloud Alpha', 100, 'Headset com drivers de câmara dupla para áudio mais nítido', 499.99),
-(null,'Cadeira Gamer DT3 Sports GT Racer', 50, 'Cadeira gamer com design ergonômico e confortável', 999.99),
-(null,'Mousepad Corsair MM800 RGB Polaris', 120, 'Mousepad com iluminação RGB personalizável', 199.99),
-(null,'Webcam Logitech C920s Pro HD', 70, 'Webcam Full HD com proteção de privacidade integrada', 399.99),
-(null,'Microfone Blue Yeti USB', 40, 'Microfone USB de alta qualidade para streaming e gravação', 699.99),
-(null,'Caixa de Som Logitech G560', 30, 'Caixas de som com tecnologia LIGHTSYNC para sincronização de luzes com jogos', 1299.99),
-(null,'Kit de Cabos Sleeved Corsair Premium', 50, 'Kit de cabos para fonte de alimentação com revestimento premium', 299.99);
+INSERT INTO produto (nome, quantidade, descricao, valor) VALUES
+('Processador Intel Core i9', 50, 'Processador de alto desempenho para PCs', 1899.99),
+('Placa Mãe ASUS ROG Strix Z590-E Gaming', 30, 'Placa mãe para jogos com suporte a Intel 11ª e 10ª geração', 1399.99),
+('Gabinete NZXT H510', 100, 'Gabinete compacto e elegante com painel frontal de vidro temperado', 299.99),
+('Fonte Corsair RM750x', 80, 'Fonte de alimentação modular com certificação 80 Plus Gold', 699.99),
+('SSD Samsung 970 EVO Plus 1TB', 120, 'SSD NVMe M.2 com velocidades de leitura de até 3500MB/s', 899.99),
+('HD Seagate Barracuda 2TB', 60, 'HD SATA 3.5" para armazenamento de dados', 399.99),
+('Cooler Master Hyper 212 RGB', 50, 'Cooler de CPU com iluminação RGB', 199.99),
+('Memória RAM Corsair Vengeance RGB Pro 16GB (2x8GB)', 70, 'Kit de memória DDR4 com iluminação RGB', 599.99),
+('Placa de Vídeo NVIDIA GeForce RTX 3080', 40, 'Placa de vídeo de alta performance para jogos e computação gráfica', 5499.99),
+('Water Cooler NZXT Kraken X73', 30, 'Sistema de resfriamento líquido com radiador de 360mm', 899.99),
+('Monitor Gamer Acer Predator XB273K', 25, 'Monitor 4K com tecnologia G-Sync para jogos', 3499.99a),
+('Teclado Mecânico Corsair K95 RGB Platinum XT', 50, 'Teclado mecânico premium com iluminação RGB', 899.99),
+('Mouse Gamer Logitech G502 Hero', 80, 'Mouse gamer com sensor Hero de até 16000 DPI', 299.99),
+('Headset HyperX Cloud Alpha', 100, 'Headset com drivers de câmara dupla para áudio mais nítido', 499.99),
+('Cadeira Gamer DT3 Sports GT Racer', 50, 'Cadeira gamer com design ergonômico e confortável', 999.99),
+('Mousepad Corsair MM800 RGB Polaris', 120, 'Mousepad com iluminação RGB personalizável', 199.99),
+('Webcam Logitech C920s Pro HD', 70, 'Webcam Full HD com proteção de privacidade integrada', 399.99),
+('Microfone Blue Yeti USB', 40, 'Microfone USB de alta qualidade para streaming e gravação', 699.99),
+('Caixa de Som Logitech G560', 30, 'Caixas de som com tecnologia LIGHTSYNC para sincronização de luzes com jogos', 1299.99),
+('Kit de Cabos Sleeved Corsair Premium', 50, 'Kit de cabos para fonte de alimentação com revestimento premium', 299.99);
 
 
 select * FROM produto;
-
 
