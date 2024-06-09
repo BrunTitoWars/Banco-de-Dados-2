@@ -43,10 +43,17 @@ CREATE TABLE venda(
 id INT AUTO_INCREMENT PRIMARY KEY,
 id_vendedor INT,
 id_cliente INT,
+id_produto INT,
+quantidade SMALLINT,
+valor DOUBLE(10,2),
+valor_venda DOUBLE(30,2),
 data_venda DATE,
 FOREIGN KEY (id_vendedor) REFERENCES funcionario(id),
-FOREIGN KEY (id_cliente) REFERENCES cliente(id) 
+FOREIGN KEY (id_cliente) REFERENCES cliente(id),
+FOREIGN KEY (id_produto) REFERENCES produto(id)
 );
+
+DROP TABLE venda;
 
 -- INSERINDO VALORES
 INSERT INTO funcionario (nome, idade, sexo, cargo, salario, nascimento) VALUES
@@ -165,7 +172,7 @@ INSERT INTO cliente (id, nome, sexo, idade, nascimento) VALUES
 SELECT COUNT(*) FROM cliente;
 
 
-INSERT INTO produto (nome, quantidade, descricao, valor) VALUES
+INSERT INTO produto (nome, quantidade, descricao, valor) VALUES 
 ('Processador Intel Core i9', 50, 'Processador de alto desempenho para PCs', 1899.99),
 ('Placa Mãe ASUS ROG Strix Z590-E Gaming', 30, 'Placa mãe para jogos com suporte a Intel 11ª e 10ª geração', 1399.99),
 ('Gabinete NZXT H510', 100, 'Gabinete compacto e elegante com painel frontal de vidro temperado', 299.99),
@@ -176,7 +183,7 @@ INSERT INTO produto (nome, quantidade, descricao, valor) VALUES
 ('Memória RAM Corsair Vengeance RGB Pro 16GB (2x8GB)', 70, 'Kit de memória DDR4 com iluminação RGB', 599.99),
 ('Placa de Vídeo NVIDIA GeForce RTX 3080', 40, 'Placa de vídeo de alta performance para jogos e computação gráfica', 5499.99),
 ('Water Cooler NZXT Kraken X73', 30, 'Sistema de resfriamento líquido com radiador de 360mm', 899.99),
-('Monitor Gamer Acer Predator XB273K', 25, 'Monitor 4K com tecnologia G-Sync para jogos', 3499.99a),
+('Monitor Gamer Acer Predator XB273K', 25, 'Monitor 4K com tecnologia G-Sync para jogos', 3499.99),
 ('Teclado Mecânico Corsair K95 RGB Platinum XT', 50, 'Teclado mecânico premium com iluminação RGB', 899.99),
 ('Mouse Gamer Logitech G502 Hero', 80, 'Mouse gamer com sensor Hero de até 16000 DPI', 299.99),
 ('Headset HyperX Cloud Alpha', 100, 'Headset com drivers de câmara dupla para áudio mais nítido', 499.99),
@@ -187,6 +194,49 @@ INSERT INTO produto (nome, quantidade, descricao, valor) VALUES
 ('Caixa de Som Logitech G560', 30, 'Caixas de som com tecnologia LIGHTSYNC para sincronização de luzes com jogos', 1299.99),
 ('Kit de Cabos Sleeved Corsair Premium', 50, 'Kit de cabos para fonte de alimentação com revestimento premium', 299.99);
 
+-- Administrador
+CREATE VIEW todas_as_tabelas AS
+SELECT *
+FROM information_schema.tables
+WHERE table_schema = 'empresa';
+CREATE USER 'administrador'@'localhost' IDENTIFIED BY '1234';
+GRANT SELECT, INSERT, UPDATE, DELETE ON todas_as_tabelas TO 'administrador'@'localhost';
 
-select * FROM produto;
+-- Gerente
+CREATE VIEW todas_as_vendas AS
+SELECT *
+FROM venda;
+CREATE USER 'gerente'@'localhost' IDENTIFIED BY '5678';
+GRANT SELECT, UPDATE, DELETE ON todas_as_tabelas TO 'gerente'@'localhost';
 
+
+-- Funcionário
+CREATE VIEW vendas AS
+SELECT id, id_cliente, id_produto, quantidade, valor, valor_venda, data_venda
+FROM venda;
+CREATE USER 'funcionario'@'localhost' IDENTIFIED BY '4321';
+GRANT SELECT, INSERT ON todas_as_tabelas TO 'funcionario'@'localhost';
+
+
+-- Outras Views
+CREATE VIEW vendas_performance AS
+SELECT COUNT(venda.id) AS 'Qtd_Venda', id_produto, SUM(quantidade) AS 'QtdProduto', SUM(valor_venda) AS 'SomaValor', funcionario.id AS 'ID_funcionario', nome, cargo
+FROM venda
+JOIN funcionario
+ON venda.id_vendedor = funcionario.id
+GROUP BY cargo;
+
+CREATE VIEW compras_mensal AS
+SELECT COUNT(venda.id) AS 'Qtd_Venda', SUM(quantidade) AS 'QtdProduto', SUM(valor_venda) AS 'SomaValor', cliente.nome AS 'nome_cliente', DATE_FORMAT(data_venda, '%m/%y') AS 'Mês/Ano'
+FROM venda
+JOIN cliente
+ON venda.id_cliente = cliente.id
+GROUP BY DATE_FORMAT(data_venda, '%m/%y');
+
+CREATE VIEW compras_sexo_e_idade AS
+SELECT COUNT(venda.id) AS 'Qtd_Venda', SUM(quantidade) AS 'QtdProduto', SUM(valor_venda) AS 'SomaValor', cliente.nome AS 'nome_cliente', cliente.sexo AS 'sexo_cliente', cliente.idade AS 'idade_cliente', DATE_FORMAT(data_venda, '%m/%y') AS 'Mês/Ano'
+FROM venda
+JOIN cliente
+ON venda.id_cliente = cliente.id
+GROUP BY cliente.sexo AND cliente.idade
+ORDER BY DATE_FORMAT(data_venda, '%m/%y');
