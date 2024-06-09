@@ -31,6 +31,24 @@ salario DOUBLE(10,2),
 nascimento DATE
 );
 
+CREATE TABLE funcionario_especial (
+    id INT PRIMARY KEY,
+    nome VARCHAR(30) NOT NULL,
+    idade SMALLINT,
+    sexo CHAR(1) CHECK(sexo in ('m', 'f', 'o')),
+    cargo VARCHAR(10) CHECK(cargo in('vendedor','gerente','CEO')),
+    salario DOUBLE(10,2),
+    nascimento DATE,
+    bonus DOUBLE(10,2)
+);
+
+
+CREATE TABLE log_bonus (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    mensagem VARCHAR(255),
+    data TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE produto(
 id INT AUTO_INCREMENT PRIMARY KEY,
 nome VARCHAR(100) NOT NULL,
@@ -53,7 +71,6 @@ FOREIGN KEY (id_cliente) REFERENCES cliente(id),
 FOREIGN KEY (id_produto) REFERENCES produto(id)
 );
 
-DROP TABLE venda;
 
 -- INSERINDO VALORES
 INSERT INTO funcionario (nome, idade, sexo, cargo, salario, nascimento) VALUES
@@ -240,3 +257,117 @@ JOIN cliente
 ON venda.id_cliente = cliente.id
 GROUP BY cliente.sexo AND cliente.idade
 ORDER BY DATE_FORMAT(data_venda, '%m/%y');
+
+
+-- TRIGGERS
+-- vendedorespecial_after_insert
+DELIMITER $$
+
+CREATE TRIGGER venda_after_insert
+AFTER INSERT ON venda
+FOR EACH ROW
+BEGIN
+    DECLARE total_vendas DOUBLE;
+    DECLARE bonus DOUBLE;
+    DECLARE vendedor_id INT;
+
+    -- Calcula o total de vendas do vendedor
+    SELECT SUM(valor_venda) INTO total_vendas
+    FROM venda
+    WHERE id_vendedor = NEW.id_vendedor AND cargo = 'vendedor';
+
+    -- Se o total de vendas for maior que 1000, insere ou atualiza na tabela funcionario_especial
+    IF total_vendas > 1000 THEN
+        SET vendedor_id = NEW.id_vendedor;
+        
+        -- Calcula o bônus de 5% sobre o valor da venda atual
+        SET bonus = NEW.valor_venda * 0.05;
+
+        -- Verifica se o vendedor já está na tabela funcionario_especial
+        IF EXISTS (SELECT 1 FROM funcionario_especial WHERE id = vendedor_id) THEN
+            -- Atualiza o bônus no salario se o vendedor já estiver na tabela funcionario_especial
+            UPDATE funcionario_especial 
+            SET salario = salario + bonus
+            WHERE id = vendedor_id;
+        ELSE
+            -- Insere o vendedor na tabela funcionario_especial se ele ainda não estiver nela
+            INSERT INTO funcionario_especial (id, nome, idade, sexo, cargo, salario, nascimento, bonus)
+            SELECT id, nome, idade, sexo, cargo, salario + bonus, nascimento, bonus
+            FROM funcionario
+            WHERE id = vendedor_id;
+        END IF;
+
+        -- Insere uma mensagem na tabela de log informando o bônus
+        INSERT INTO log_bonus (mensagem) 
+        VALUES (CONCAT('Bônus salarial total necessário para custear: R$ ', bonus));
+    END IF;
+END$$
+
+DELIMITER ;
+
+
+-- venda_after_insert_clienteespecial
+DELIMITER $$
+
+CREATE TRIGGER venda_after_insert_clienteespecial
+AFTER INSERT ON venda
+FOR EACH ROW
+BEGIN
+    DECLARE total_gasto DOUBLE;
+    DECLARE cashback DOUBLE;
+    DECLARE cliente_id INT;
+
+    -- Calcula o total gasto do cliente
+    SELECT SUM(valor_venda) INTO total_gasto
+    FROM venda
+    WHERE id_cliente = NEW.id_cliente;
+
+    -- Se o total gasto for maior que 500, insere ou atualiza na tabela clienteespecial
+    IF total_gasto > 500 THEN
+        SET cliente_id = NEW.id_cliente;
+        
+        -- Calcula o cashback de 2% sobre o valor da venda atual
+        SET cashback = NEW.valor_venda * 0.02;
+
+        -- Verifica se o cliente já está na tabela clienteespecial
+        IF EXISTS (SELECT 1 FROM clienteespecial WHERE id_cliente = cliente_id) THEN
+            -- Atualiza o cashback se o cliente já estiver na tabela clienteespecial
+            UPDATE clienteespecial 
+            SET cashback = cashback + NEW.valor_venda * 0.02
+            WHERE id_cliente = cliente_id;
+        ELSE
+            -- Insere o cliente na tabela clienteespecial se ele ainda não estiver nela
+            INSERT INTO clienteespecial (id_cliente, nome, sexo, idade, cashback)
+            SELECT id, nome, sexo, idade, cashback
+            FROM cliente
+            WHERE id = cliente_id;
+        END IF;
+
+        -- Insere uma mensagem na tabela de log informando o valor do cashback
+        INSERT INTO log_bonus (mensagem) 
+        VALUES (CONCAT('Cashback total necessário para custear: R$ ', cashback));
+    END IF;
+END$$
+
+DELIMITER ;
+
+
+-- clicente especial com cashback zero
+DELIMITER $$
+
+CREATE TRIGGER cashback_zero_delete
+AFTER UPDATE ON clienteespecial
+FOR EACH ROW
+BEGIN
+    -- Verifica se o valor do cashback é zero
+    IF NEW.cashback = 0 THEN
+        -- Remove o cliente da tabela clienteespecial
+        DELETE FROM clienteespecial WHERE id_cliente = NEW.id_cliente;
+
+        -- Insere uma mensagem na tabela de log informando a remoção
+        INSERT INTO log_bonus (mensagem) 
+        VALUES (CONCAT('Cliente removido da tabela de clientes especiais: ID ', NEW.id_cliente, ', Nome: ', NEW.nome));
+    END IF;
+END$$
+
+DELIMITER ;
