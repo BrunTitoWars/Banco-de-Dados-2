@@ -4,31 +4,31 @@ USE empresa;
 
 -- criando as tabelas;
 CREATE TABLE cliente(
-id INT PRIMARY KEY,
-nome VARCHAR(30) NOT NULL,
-sexo CHAR CHECK(sexo in ('m', 'f', 'o')),
-idade SMALLINT,
-nascimento DATE
+    id INT PRIMARY KEY,
+    nome VARCHAR(30) NOT NULL,
+    sexo CHAR CHECK(sexo in ('m', 'f', 'o')),
+    idade SMALLINT,
+    nascimento DATE
 );
 
 CREATE TABLE clienteespecial(
-id INT PRIMARY KEY,
-nome VARCHAR(30) NOT NULL,
-sexo CHAR CHECK(sexo in ('m', 'f', 'o')),
-idade SMALLINT,
-id_cliente INT,
-cashback DOUBLE(6,2),
-FOREIGN KEY (id_cliente) REFERENCES cliente(id)
+    id INT PRIMARY KEY,
+    nome VARCHAR(30) NOT NULL,
+    sexo CHAR CHECK(sexo in ('m', 'f', 'o')),
+    idade SMALLINT,
+    id_cliente INT,
+    cashback DOUBLE(6,2),
+    FOREIGN KEY (id_cliente) REFERENCES cliente(id)
 );
 
 CREATE TABLE funcionario(
-id INT AUTO_INCREMENT PRIMARY KEY,
-nome VARCHAR(30) NOT NULL,
-idade SMALLINT,
-sexo CHAR(1) CHECK(sexo in ('m', 'f', 'o')),
-cargo VARCHAR(10) CHECK(cargo in('vendedor','gerente','CEO')),
-salario DOUBLE(10,2),
-nascimento DATE
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(30) NOT NULL,
+    idade SMALLINT,
+    sexo CHAR(1) CHECK(sexo in ('m', 'f', 'o')),
+    cargo VARCHAR(10) CHECK(cargo in('vendedor','gerente','CEO')),
+    salario DOUBLE(10,2),
+    nascimento DATE
 );
 
 CREATE TABLE funcionario_especial (
@@ -50,25 +50,25 @@ CREATE TABLE log_bonus (
 );
 
 CREATE TABLE produto(
-id INT AUTO_INCREMENT PRIMARY KEY,
-nome VARCHAR(100) NOT NULL,
-quantidade SMALLINT,
-descricao VARCHAR(200),
-valor DOUBLE(10,2)
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    quantidade SMALLINT,
+    descricao VARCHAR(200),
+    valor DOUBLE(10,2)
 );
 
 CREATE TABLE venda(
-id INT AUTO_INCREMENT PRIMARY KEY,
-id_vendedor INT,
-id_cliente INT,
-id_produto INT,
-quantidade SMALLINT,
-valor DOUBLE(10,2),
-valor_venda DOUBLE(30,2),
-data_venda DATE,
-FOREIGN KEY (id_vendedor) REFERENCES funcionario(id),
-FOREIGN KEY (id_cliente) REFERENCES cliente(id),
-FOREIGN KEY (id_produto) REFERENCES produto(id)
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_vendedor INT,
+    id_cliente INT,
+    id_produto INT,
+    quantidade SMALLINT,
+    valor DOUBLE(10,2),
+    valor_venda DOUBLE(30,2),
+    data_venda DATE,
+    FOREIGN KEY (id_vendedor) REFERENCES funcionario(id),
+    FOREIGN KEY (id_cliente) REFERENCES cliente(id),
+    FOREIGN KEY (id_produto) REFERENCES produto(id)
 );
 
 
