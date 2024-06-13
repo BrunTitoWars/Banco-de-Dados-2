@@ -1,3 +1,5 @@
+-- Active: 1717622352496@@127.0.0.1@3306@empresa
+
 CREATE DATABASE IF NOT EXISTS empresa;
 
 USE empresa;
@@ -188,7 +190,6 @@ INSERT INTO cliente (id, nome, sexo, idade, nascimento) VALUES
 
 SELECT COUNT(*) FROM cliente;
 
-
 INSERT INTO produto (nome, quantidade, descricao, valor) VALUES 
 ('Processador Intel Core i9', 50, 'Processador de alto desempenho para PCs', 1899.99),
 ('Placa Mãe ASUS ROG Strix Z590-E Gaming', 30, 'Placa mãe para jogos com suporte a Intel 11ª e 10ª geração', 1399.99),
@@ -211,6 +212,8 @@ INSERT INTO produto (nome, quantidade, descricao, valor) VALUES
 ('Caixa de Som Logitech G560', 30, 'Caixas de som com tecnologia LIGHTSYNC para sincronização de luzes com jogos', 1299.99),
 ('Kit de Cabos Sleeved Corsair Premium', 50, 'Kit de cabos para fonte de alimentação com revestimento premium', 299.99);
 
+SELECT User, Host FROM mysql.user;
+
 -- Administrador
 CREATE VIEW todas_as_tabelas AS
 SELECT *
@@ -219,14 +222,6 @@ WHERE table_schema = 'empresa';
 CREATE USER 'administrador'@'localhost' IDENTIFIED BY '1234';
 GRANT SELECT, INSERT, UPDATE, DELETE ON todas_as_tabelas TO 'administrador'@'localhost';
 
--- Gerente
-CREATE VIEW todas_as_vendas AS
-SELECT *
-FROM venda;
-CREATE USER 'gerente'@'localhost' IDENTIFIED BY '5678';
-GRANT SELECT, UPDATE, DELETE ON todas_as_tabelas TO 'gerente'@'localhost';
-
-
 -- Funcionário
 CREATE VIEW vendas AS
 SELECT id, id_cliente, id_produto, quantidade, valor, valor_venda, data_venda
@@ -234,6 +229,12 @@ FROM venda;
 CREATE USER 'funcionario'@'localhost' IDENTIFIED BY '4321';
 GRANT SELECT, INSERT ON todas_as_tabelas TO 'funcionario'@'localhost';
 
+-- Gerente
+CREATE VIEW todas_as_vendas AS
+SELECT *
+FROM venda;
+CREATE USER 'gerente'@'localhost' IDENTIFIED BY '5678';
+GRANT SELECT, UPDATE, DELETE ON todas_as_tabelas TO 'gerente'@'localhost';
 
 -- Outras Views
 CREATE VIEW vendas_performance AS
